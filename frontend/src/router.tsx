@@ -10,6 +10,7 @@ import AdminNews from './pages/admin/AdminNews'
 import AdminStats from './pages/admin/AdminStats'
 import AdminVouchers from './pages/admin/AdminVouchers'
 import NotFound from './pages/NotFound'
+import RouteError from './pages/RouteError'
 import Catalog from './pages/portal/Catalog'
 import Certifications from './pages/portal/Certifications'
 import Course from './pages/portal/Course'
@@ -24,6 +25,10 @@ import Home from './pages/public/Home'
 import Login from './pages/public/Login'
 
 export const router = createBrowserRouter([
+  {
+    // Any render crash (e.g. hand-edited demo data) lands here instead of a blank page.
+    errorElement: <RouteError />,
+    children: [
   { element: <PublicLayout />, children: [{ path: '/', element: <Home /> }, { path: '/login', element: <Login /> }] },
   { element: <ContactLayout />, children: [{ path: '/contact', element: <Contact /> }] },
   {
@@ -52,4 +57,6 @@ export const router = createBrowserRouter([
     ],
   },
   { path: '*', element: <NotFound /> },
+    ],
+  },
 ])

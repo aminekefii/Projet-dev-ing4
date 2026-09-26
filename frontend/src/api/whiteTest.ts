@@ -56,7 +56,11 @@ export async function current(certId: number): Promise<TakeView> {
   if (w.submitted) return { status: 'submitted' }
   if (remaining(w) <= 0) {
     w.submitted = true
-    save()
+    try {
+      save()
+    } catch {
+      // Storage full: the timeout is recomputed from startedAt on the next read anyway.
+    }
     return { status: 'submitted' }
   }
   const bank = QUESTION_BANKS[w.certCode]
@@ -92,7 +96,8 @@ export async function result(certId: number): Promise<ResultView | null> {
   await delay()
   const user = requireRole('student')
   const w = stateFor(user.id)
-  if (!w || w.certId !== certId || !w.submitted) return null
+  // A test past its deadline counts as submitted even if saving that failed.
+  if (!w || w.certId !== certId || (!w.submitted && remaining(w) > 0)) return null
   const cert = findCert(certId)
   if (!cert) throw new ApiError(404, 'Certification not found.')
   const items = QUESTION_BANKS[w.certCode].map((q, i) => {

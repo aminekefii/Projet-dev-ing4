@@ -29,7 +29,7 @@ export default function AdminMessages() {
   const flash = FLASH[params.get('flash') ?? '']
   const { data, error, reload } = useAsync(() => messages.list(filter), [filter])
   const [toDelete, setToDelete] = useState<ContactMessage | null>(null)
-  const { busy, run } = useBusy()
+  const { busy, error: actionError, run } = useBusy()
 
   if (error) return <ErrorBox error={error} />
   if (!data) return <Loading />
@@ -38,10 +38,13 @@ export default function AdminMessages() {
     if (!toDelete) return
     const id = toDelete.id
     void run(async () => {
-      await messages.remove(id)
-      setToDelete(null)
-      setParams({ flash: 'deleted' })
-      reload()
+      try {
+        await messages.remove(id)
+        setParams({ flash: 'deleted' })
+      } finally {
+        setToDelete(null)
+        reload()
+      }
     })
   }
 
@@ -59,7 +62,15 @@ export default function AdminMessages() {
             </div>
           </div>
 
-          {flash && (
+          {actionError && (
+            <div className="row">
+              <div className="col-lg-12">
+                <FeFlash error><span>{actionError}</span></FeFlash>
+              </div>
+            </div>
+          )}
+
+          {flash && !actionError && (
             <div className="row">
               <div className="col-lg-12">
                 <FeFlash><span>{flash}</span></FeFlash>

@@ -43,11 +43,16 @@ export async function get(id: number): Promise<ContactMessage> {
   requireRole('admin')
   const m = db().tables.contactMessages.find(x => x.id === id)
   if (!m) throw new ApiError(404, 'Message not found.')
+  const message = { ...m, status: 'read' as const }
   if (m.status === 'unread') {
     m.status = 'read'
-    save()
+    try {
+      save()
+    } catch {
+      // Storage full: still show the message; it just stays unread.
+    }
   }
-  return { ...m }
+  return message
 }
 
 export async function remove(id: number): Promise<void> {

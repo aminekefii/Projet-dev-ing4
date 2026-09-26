@@ -60,8 +60,10 @@ export function Header({ variant }: { variant: Variant }) {
   }
   const onSignOut = async (e: MouseEvent) => {
     e.preventDefault()
-    await logout()
+    // Leave the protected page first, so its guard doesn't redirect to /login
+    // when the user is cleared (v1 logout.php lands on the home page).
     navigate('/')
+    await logout()
   }
   const brand = variant === 'admin'
     ? { to: '/admin', alt: 'TEK-UP Admin', sub: ' Admin Console' }

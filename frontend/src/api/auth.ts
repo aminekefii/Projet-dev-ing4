@@ -19,7 +19,13 @@ export async function login(email: string, password: string): Promise<PublicUser
 export async function logout(): Promise<void> {
   await delay()
   db().sessionUserId = null
-  save()
+  try {
+    save()
+  } catch {
+    // Storage full: the rollback restored the session, so clear it again in memory.
+    // Signing out must always work.
+    db().sessionUserId = null
+  }
 }
 
 export async function currentUser(): Promise<PublicUser | null> {

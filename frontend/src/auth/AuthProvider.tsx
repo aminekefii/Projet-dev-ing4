@@ -8,11 +8,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let alive = true
-    auth.currentUser().then(u => {
-      if (!alive) return
-      setUser(u)
-      setReady(true)
-    })
+    // Always become ready, even if reading the session fails (treated as logged out).
+    auth.currentUser()
+      .then(u => { if (alive) setUser(u) })
+      .catch(() => { if (alive) setUser(null) })
+      .finally(() => { if (alive) setReady(true) })
     return () => { alive = false }
   }, [])
 
@@ -22,8 +22,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return u
   }, [])
   const logout = useCallback(async () => {
-    await auth.logout()
-    setUser(null)
+    try {
+      await auth.logout()
+    } finally {
+      setUser(null)
+    }
   }, [])
 
   const value = useMemo(() => ({ user, ready, login, logout }), [user, ready, login, logout])

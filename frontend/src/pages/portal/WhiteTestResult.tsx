@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ApiError, isApiError, whiteTest } from '../../api'
 import { ErrorBox, Loading } from '../../components/Loading'
+import { Notice } from '../../components/Notice'
 import { useAsync } from '../../hooks/useAsync'
 import { useBusy } from '../../hooks/useBusy'
 import { useIdParam } from '../../hooks/useIdParam'
@@ -10,7 +11,7 @@ export default function WhiteTestResult() {
   usePageTitle('White Test — Result')
   const certId = useIdParam('certId')
   const navigate = useNavigate()
-  const { busy, run } = useBusy()
+  const { busy, error: actionError, run } = useBusy()
   const { data: result, error } = useAsync(
     () => (certId ? whiteTest.result(certId) : Promise.reject(new ApiError(404, 'Certification not found.'))),
     [certId],
@@ -70,6 +71,7 @@ export default function WhiteTestResult() {
                 )
               })}
             </div>
+            {actionError && <Notice type="error" message={actionError} />}
             <div className="wt-actions">
               {result.passed ? (
                 <>

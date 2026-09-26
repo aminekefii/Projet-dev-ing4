@@ -95,10 +95,18 @@ function Countdown({ seconds, onExpire }: { seconds: number; onExpire(): void })
 
   useEffect(() => { expire.current = onExpire })
 
+  // Derive the time left from a fixed deadline rather than counting ticks:
+  // browsers slow timers down in background tabs, and a tick counter drifts.
   useEffect(() => {
-    const id = window.setInterval(() => setLeft(l => Math.max(0, l - 1)), 1000)
-    return () => window.clearInterval(id)
-  }, [])
+    const deadline = Date.now() + Math.max(0, seconds) * 1000
+    const update = () => setLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)))
+    const id = window.setInterval(update, 1000)
+    document.addEventListener('visibilitychange', update)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', update)
+    }
+  }, [seconds])
 
   useEffect(() => {
     if (left === 0 && !fired.current) {

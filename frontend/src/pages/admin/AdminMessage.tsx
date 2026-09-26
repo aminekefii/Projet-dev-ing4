@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ApiError, isApiError, messages } from '../../api'
 import { ConfirmModal } from '../../components/ConfirmModal'
 import { ErrorBox, Loading } from '../../components/Loading'
+import { Notice } from '../../components/Notice'
 import { useAsync } from '../../hooks/useAsync'
 import { useBusy } from '../../hooks/useBusy'
 import { useIdParam } from '../../hooks/useIdParam'
@@ -19,7 +20,7 @@ export default function AdminMessage() {
     [id],
   )
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const { busy, run } = useBusy()
+  const { busy, error: actionError, run } = useBusy()
   usePageTitle(msg ? `Message from ${senderName(msg)} — Admin` : 'Messages — Admin')
 
   if (!id || isApiError(error, 404)) return <Navigate to="/admin/messages" replace />
@@ -34,8 +35,12 @@ export default function AdminMessage() {
     navigate('/admin/messages?flash=marked_unread')
   })
   const onDelete = () => run(async () => {
-    await messages.remove(msg.id)
-    navigate('/admin/messages?flash=deleted')
+    try {
+      await messages.remove(msg.id)
+      navigate('/admin/messages?flash=deleted')
+    } finally {
+      setConfirmDelete(false)
+    }
   })
 
   return (
@@ -76,6 +81,7 @@ export default function AdminMessage() {
                   ))}
                 </div>
 
+                {actionError && <Notice type="error" message={actionError} />}
                 <div className="msg-detail__actions">
                   <a className="wt-btn wt-btn--primary" href={`mailto:${msg.email}?subject=Re%3A%20your%20message%20to%20TEK-UP`}>
                     <span>Reply by email</span>

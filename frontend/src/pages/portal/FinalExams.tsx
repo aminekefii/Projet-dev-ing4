@@ -18,7 +18,7 @@ export default function FinalExams() {
   usePageTitle('Final Exam Vouchers — TEK-UP')
   const [params, setParams] = useSearchParams()
   const { data: eligible, error, reload } = useAsync(() => vouchers.listReady(), [])
-  const { busy, run } = useBusy()
+  const { busy, error: actionError, run } = useBusy()
 
   if (error) return <ErrorBox error={error} />
   if (!eligible) return <Loading />
@@ -42,7 +42,15 @@ export default function FinalExams() {
           </div>
         </div>
 
-        {params.get('flash') === 'requested' && (
+        {actionError && (
+          <div className="row">
+            <div className="col-lg-12">
+              <FeFlash error><span>{actionError}</span></FeFlash>
+            </div>
+          </div>
+        )}
+
+        {!actionError && params.get('flash') === 'requested' && (
           <div className="row">
             <div className="col-lg-12">
               <FeFlash icon="fa-paper-plane">
