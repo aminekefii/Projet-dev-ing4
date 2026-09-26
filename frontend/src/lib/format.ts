@@ -27,3 +27,5 @@ export function formatDateDot(iso: string): string {
 export const studentId = (id: number): string => `TU-${String(id).padStart(5, '0')}`
 /** v1 rule: plural "s" omitted only when n === 1 */
 export const plural = (n: number): string => (n === 1 ? '' : 's')
+/** "Name Surname" of a contact message sender. */
+export const senderName = (m: { name: string; surname: string }): string => `${m.name} ${m.surname}`.trim()
