@@ -1,0 +1,79 @@
+TEK-UP Certified Students — v2 architecture notes (work in progress)
+====================================================================
+Last updated: 2026-09-22
+Status: brainstorming, NOT final. No code written yet.
+
+Context
+-------
+- v1 (../Project) is a PHP/MySQL demo. It will not be fixed; it is being
+  rebuilt here with a new architecture.
+- Purpose: school project (graded), with a personal touch.
+
+Decisions so far
+----------------
+- Backend:   Django + Django REST Framework (DRF)
+- Frontend:  React (Vite + TypeScript)
+- Database:  PostgreSQL
+- Runtime:   Docker / docker compose
+- FastAPI:   NOT used. Django already covers it; two Python backends would
+             mean duplicated models and auth. (If the FastAPI style is wanted,
+             Django Ninja gives it inside Django.)
+- Keycloak:  NOT used for now. Use Django's built-in auth instead:
+             - hashed passwords, no hard-coded admin, CSRF protection
+             - session cookies (React and Django behind the same Nginx origin)
+             - roles via Django groups: "student", "admin"
+             - keep all auth code in one Django app ("accounts") so Keycloak
+               can be swapped in later as a bonus without touching the rest.
+
+Proposed architecture (draft)
+-----------------------------
+                 +-------------------- docker compose --------------------+
+ Browser ------> |  Nginx (single entry point)                             |
+                 |   /        -> React app                                |
+                 |   /api/    -> Django + DRF (gunicorn)                  |
+                 |   /admin/  -> Django admin                             |
+                 |   /media/  -> protected videos (internal only)         |
+                 |                                                        |
+                 |  PostgreSQL                                            |
+                 |  Mailpit (dev only: catches outgoing emails)           |
+                 +--------------------------------------------------------+
+
+Ideas / improvements over v1 (to be confirmed)
+----------------------------------------------
+1. Protected video streaming: Django checks enrolment, then Nginx serves the
+   file via X-Accel-Redirect (replaces stream.php, proper seeking).
+2. Honest progress tracking: the player reports watched time; a video counts
+   only after ~90% watched (v1 allowed faking 100%).
+3. Django admin as back office (vouchers, messages, news, question banks,
+   stats) instead of hand-built admin pages.
+4. White tests in the database: question banks per certification, attempts
+   saved (fixes v1's PCAP-only hard-coded bank / broken PCEP test).
+5. Real voucher emails (Mailpit in dev) instead of a mailto: link.
+6. OpenAPI schema (drf-spectacular) -> generated TypeScript API client.
+7. Frontend libs to choose: React Router, TanStack Query,
+   Tailwind + shadcn/ui OR MUI.
+8. Testing: pytest-django, Vitest, Playwright; CI with GitHub Actions.
+9. Later / optional: PDF certificates with verification QR code,
+   Celery + Redis for background jobs, Keycloak.
+
+Features carried over from v1
+-----------------------------
+- Public site: home, news carousel, contact form
+- Student portal: dashboard, catalog + enrolment, my certifications,
+  course player (videos + subtitles), progress, white test, voucher requests,
+  profile + avatar
+- Admin: dashboard, voucher approval, messages, news images, statistics
+
+Open questions (next session)
+-----------------------------
+- Deadline and team size?
+- Which v1 features are in scope for v2's first version?
+- Frontend UI library: Tailwind + shadcn/ui or MUI?
+- Where do course videos live (local volume vs object storage like MinIO)?
+- The "personal touch": what should make v2 stand out?
+
+Next steps
+----------
+1. Answer the open questions.
+2. Present the design section by section and approve it.
+3. Write the final spec, then an implementation plan, then start coding.
