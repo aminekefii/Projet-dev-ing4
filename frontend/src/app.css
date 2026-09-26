@@ -1,0 +1,4 @@
+/* Additions for the React port only. v1 styles live in public/assets/css. */
+.not-found { padding: 180px 0 120px; text-align: center; }
+.not-found .main-blue-button { display: inline-block; margin-top: 20px; }
+.modal-backdrop.show { opacity: 0.5; }

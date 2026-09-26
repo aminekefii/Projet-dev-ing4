@@ -1,3 +1,13 @@
+import { RouterProvider } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthProvider'
+import { Preloader } from './components/Preloader'
+import { router } from './router'
+
 export default function App() {
-  return <div className="container"><h2>TEK-UP <em>v2</em></h2></div>
+  return (
+    <AuthProvider>
+      <Preloader />
+      <RouterProvider router={router} />
+    </AuthProvider>
+  )
 }
