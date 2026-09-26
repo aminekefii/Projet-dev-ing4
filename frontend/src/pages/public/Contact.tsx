@@ -85,7 +85,7 @@ export default function Contact() {
                 </div>
                 <div className="col-lg-12">
                   <fieldset>
-                    <input type="text" inputMode="email" name="email" id="email" placeholder="Your Email" value={shown.email} onChange={set('email')} disabled={!!student} required={!student} />
+                    <input type="email" name="email" id="email" placeholder="Your Email" value={shown.email} onChange={set('email')} disabled={!!student} required={!student} />
                   </fieldset>
                 </div>
                 <div className="col-lg-12">

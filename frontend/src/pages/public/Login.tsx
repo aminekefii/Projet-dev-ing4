@@ -60,8 +60,7 @@ export default function Login() {
                 <div className="col-lg-12">
                   <fieldset>
                     <label htmlFor="email">Email</label>
-                    {/* type="text" so the API's own email message shows instead of the browser's */}
-                    <input type="text" inputMode="email" name="email" id="email" placeholder="you@tek-up.de" required value={email} onChange={e => setEmail(e.target.value)} />
+                    <input type="email" name="email" id="email" placeholder="you@tek-up.de" required value={email} onChange={e => setEmail(e.target.value)} />
                   </fieldset>
                 </div>
                 <div className="col-lg-12">
