@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local sample course media (see public/media/README.txt)
+public/media/*
+!public/media/README.txt
