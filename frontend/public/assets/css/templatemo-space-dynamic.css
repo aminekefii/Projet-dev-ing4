@@ -1823,6 +1823,7 @@ Login page
   margin-bottom: 8px;
 }
 
+.login-card input[type="text"],
 .login-card input[type="email"],
 .login-card input[type="password"] {
   width: 100%;
@@ -1838,11 +1839,13 @@ Login page
   transition: all 0.25s ease;
 }
 
+.login-card input[type="text"]::placeholder,
 .login-card input[type="email"]::placeholder,
 .login-card input[type="password"]::placeholder {
   color: #8a8170;
 }
 
+.login-card input[type="text"]:focus,
 .login-card input[type="email"]:focus,
 .login-card input[type="password"]:focus {
   background-color: #fff;
