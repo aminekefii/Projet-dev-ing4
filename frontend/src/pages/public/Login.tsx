@@ -81,6 +81,7 @@ export default function Login() {
                   </fieldset>
                 </div>
                 <div className="col-lg-12">
+                  <p className="signup-line">Don&rsquo;t have an account? <Link to="/signup">Sign up &rarr;</Link></p>
                   <p className="signup-line">Not a student yet? <Link to="/#contact">Talk to the Certifications Office &rarr;</Link></p>
                 </div>
               </div>

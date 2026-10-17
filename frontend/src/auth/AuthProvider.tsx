@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { auth, type PublicUser } from '../api'
+import { auth, type PublicUser, type SignupForm } from '../api'
 import { AuthContext } from './context'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -21,6 +21,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     return u
   }, [])
+  const register = useCallback(async (form: SignupForm) => {
+    const u = await auth.register(form)
+    setUser(u)
+    return u
+  }, [])
   const logout = useCallback(async () => {
     try {
       await auth.logout()
@@ -29,6 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value = useMemo(() => ({ user, ready, login, logout }), [user, ready, login, logout])
+  const value = useMemo(() => ({ user, ready, login, register, logout }), [user, ready, login, register, logout])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

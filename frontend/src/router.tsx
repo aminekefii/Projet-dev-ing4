@@ -23,13 +23,14 @@ import WhiteTestTake from './pages/portal/WhiteTestTake'
 import Contact from './pages/public/Contact'
 import Home from './pages/public/Home'
 import Login from './pages/public/Login'
+import Signup from './pages/public/Signup'
 
 export const router = createBrowserRouter([
   {
     // Any render crash (e.g. hand-edited demo data) lands here instead of a blank page.
     errorElement: <RouteError />,
     children: [
-  { element: <PublicLayout />, children: [{ path: '/', element: <Home /> }, { path: '/login', element: <Login /> }] },
+  { element: <PublicLayout />, children: [{ path: '/', element: <Home /> }, { path: '/login', element: <Login /> }, { path: '/signup', element: <Signup /> }] },
   { element: <ContactLayout />, children: [{ path: '/contact', element: <Contact /> }] },
   {
     element: <PortalLayout />,
