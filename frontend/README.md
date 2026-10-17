@@ -9,6 +9,17 @@ React + Vite + TypeScript port of the v1 PHP pages (`../../Project`). It runs wi
     npm run build    # type-check + production build
     npm run lint
 
+## Run with Docker
+
+From `Project_v2/`:
+
+    docker compose up --build -d             # production build behind Nginx: http://localhost:8088
+    docker compose --profile dev up dev      # Vite dev server with hot reload: http://localhost:5173
+    docker compose down
+
+Ports can be changed with `WEB_PORT` / `DEV_PORT` (e.g. `WEB_PORT=9000 docker compose up -d`).
+Course videos in `public/media/` are mounted into the Nginx container, not baked into the image.
+
 ## Demo accounts (mock only)
 
 | Role | Email | Password |

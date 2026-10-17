@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+*.log
+*.local
+.vscode
+.idea
+Dockerfile
+.dockerignore
+public/media/*
+!public/media/README.txt

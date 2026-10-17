@@ -1,0 +1,31 @@
+# TEK-UP Certified Students v2
+#
+#   docker compose up --build              -> production build on http://localhost:8088 (override with WEB_PORT)
+#   docker compose --profile dev up dev    -> Vite dev server on http://localhost:5173
+#
+# Backend (Django + DRF), PostgreSQL and Mailpit will be added here later;
+# see architecture-notes.txt.
+
+services:
+  web:
+    build:
+      context: ./frontend
+      target: prod
+    ports:
+      - "${WEB_PORT:-8088}:80"
+    volumes:
+      # Course videos stay on the host (not baked into the image).
+      - ./frontend/public/media:/usr/share/nginx/html/media:ro
+    restart: unless-stopped
+
+  dev:
+    profiles: ["dev"]
+    build:
+      context: ./frontend
+      target: dev
+    ports:
+      - "${DEV_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      # Keep the container's Linux node_modules, not the host's.
+      - /app/node_modules
