@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local dev database (PostgreSQL comes later via Docker)
+db.sqlite3
+
+# Local settings / secrets
+.env
