@@ -1,11 +1,11 @@
 # TEK-UP Certified Students — v2 frontend
 
-React + Vite + TypeScript port of the v1 PHP pages (`../../Project`). It runs without a backend: all data comes from a mock API in `src/api/`, saved in the browser's localStorage.
+React + Vite + TypeScript port of the v1 PHP pages (`../../Project`). Sign up, sign in and sign out use the Django backend (`../backend`); everything else still comes from a mock API in `src/api/`, saved in the browser's localStorage.
 
 ## Run
 
     npm install
-    npm run dev      # http://localhost:5173
+    npm run dev      # http://localhost:5173 — /api is proxied to Django on :8000 (start it first)
     npm run build    # type-check + production build
     npm run lint
 
@@ -20,7 +20,9 @@ From `Project_v2/`:
 Ports can be changed with `WEB_PORT` / `DEV_PORT` (e.g. `WEB_PORT=9000 docker compose up -d`).
 Course videos in `public/media/` are mounted into the Nginx container, not baked into the image.
 
-## Demo accounts (mock only)
+## Demo accounts
+
+Create them in Django once with `python manage.py seed_demo_users` (in `../backend`). The mock data (enrolments, progress, vouchers) is attached to these emails.
 
 | Role | Email | Password |
 |---|---|---|
@@ -33,6 +35,8 @@ Course videos in `public/media/` are mounted into the Nginx container, not baked
 ## Mock API
 
 - `src/api/*.ts` — one module per domain; every function is async and returns the shape the Django API will return. To connect Django, replace the bodies with `fetch('/api/...')`; pages don't change.
+- `src/api/http.ts` — `fetch` wrapper for Django: sends the CSRF token, turns `{detail}` errors into `ApiError`.
+- `src/api/auth.ts` — already real: calls `/api/auth/*`, then links the Django user to the mock user with the same email so the other mock pages keep working.
 - `src/api/db.ts` — in-memory store persisted to localStorage (`tekup-v2-mock-db`).
 - `src/api/fixtures.ts` — seed data from `Project/database/tekup.sql` plus demo course content.
 

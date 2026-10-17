@@ -1,3 +1,4 @@
+import { verifyPassword } from './auth'
 import { db, nextId, save } from './db'
 import { ApiError } from './errors'
 import { featuredIds, findCert, findEnrolment, orderedCertifications } from './queries'
@@ -35,7 +36,7 @@ export async function enroll(certId: number, password: string): Promise<Flash> {
   const user = requireRole('student')
   if (!featuredIds().includes(certId)) throw new ApiError(400, 'That certification is not currently open for enrolment.')
   if (password === '') throw new ApiError(400, 'Please enter your password to confirm the enrolment.')
-  if (password !== user.password) throw new ApiError(400, 'Wrong password. Enrolment cancelled.')
+  if (!(await verifyPassword(password))) throw new ApiError(400, 'Wrong password. Enrolment cancelled.')
   if (!findCert(certId)) throw new ApiError(400, 'That certification could not be found.')
   if (findEnrolment(user.id, certId)) return { type: 'info', message: 'You are already enrolled in that certification.' }
   db().tables.userCertifications.push({

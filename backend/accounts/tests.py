@@ -8,6 +8,7 @@ LOGIN = '/api/auth/login/'
 LOGOUT = '/api/auth/logout/'
 ME = '/api/auth/me/'
 CSRF = '/api/auth/csrf/'
+VERIFY = '/api/auth/verify-password/'
 
 VALID = {'firstname': 'Sam', 'lastname': 'Test', 'email': 'Sam@Tek-Up.de', 'password': 'blue-falcon-42'}
 
@@ -72,6 +73,13 @@ class AuthTests(APITestCase):
         r = self.post(LOGIN, {'email': 'user1@tek-up.de', 'password': 'wrong'})
         self.assertEqual(r.status_code, 401)
         self.assertEqual(r.data['detail'], 'Invalid email or password.')
+
+    def test_verify_password(self):
+        self.post(REGISTER, VALID)
+        self.assertEqual(self.post(VERIFY, {'password': VALID['password']}).status_code, 204)
+        self.assertEqual(self.post(VERIFY, {'password': 'wrong'}).status_code, 400)
+        self.post(LOGOUT)
+        self.assertEqual(self.post(VERIFY, {'password': VALID['password']}).status_code, 403)
 
     def test_post_without_csrf_token_is_refused(self):
         r = self.client.post(REGISTER, VALID, format='json')

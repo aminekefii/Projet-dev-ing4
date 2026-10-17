@@ -26,7 +26,7 @@ v1 (`../Project`) was a PHP/MySQL demo. v2 rebuilds it with a modern stack: a Re
 ```
 Project_v2/
 ├── frontend/            React app (see frontend/README.md)
-│   └── src/api/         mock API (data saved in the browser) — will call Django later
+│   └── src/api/         API layer: auth calls Django, the rest is still a mock (data saved in the browser)
 ├── backend/             Django project
 │   ├── config/          settings, URLs, WSGI/ASGI
 │   ├── accounts/        users, sign up, sign in, sign out (API under /api/auth/)
@@ -51,7 +51,13 @@ Project_v2/
    - Roles are Django groups `student` and `admin` (created by a migration). New sign-ups are students; superusers count as admins.
    - Sign-in uses Django session cookies, with CSRF protection on every POST.
    - Responses use the same user shape as the frontend: `id, email, firstname, lastname, role, createdAt`. Errors return `{"detail": "message"}`.
-   - 7 automated tests (`python manage.py test accounts`). The frontend still uses the mock API.
+   - Automated tests: `python manage.py test accounts` (8 tests).
+6. **Frontend sign in / sign up connected to Django** (2026-10-17)
+   - The sign-in, sign-up and sign-out buttons now call the Django API. The Vite dev server forwards every `/api/...` request to Django on port 8000, so the browser sees one origin and the session cookie just works.
+   - `frontend/src/api/http.ts` sends the CSRF token on every POST and turns Django's `{"detail": ...}` errors into the messages shown on the forms.
+   - The other pages still use the mock data. After signing in, the Django user is linked to the mock user with the same email, so the demo data still shows up. New accounts start with no data.
+   - Enrolment and voucher approval ask for the user's password again: the new `POST /api/auth/verify-password/` checks it in Django.
+   - `python manage.py seed_demo_users` creates the demo accounts (user1, user2, admin @tek-up.de) in Django.
 
 ## Auth API
 
@@ -62,6 +68,7 @@ Project_v2/
 | POST | `/api/auth/login/` | Body `email, password`. Signs in (200). Wrong details → 401 |
 | POST | `/api/auth/logout/` | Signs out (204) |
 | GET | `/api/auth/me/` | The signed-in user (200), or 403 when nobody is signed in |
+| POST | `/api/auth/verify-password/` | Body `password`. 204 if it is the signed-in user's password, 400 if not |
 
 Every POST must send the header `X-CSRFToken: <value of the csrftoken cookie>`.
 Passwords follow Django's rules: at least 8 characters, not too common, not all numbers, not too close to the name or email.
@@ -73,7 +80,7 @@ Passwords follow Django's rules: at least 8 characters, not too common, not all 
 ```
 cd frontend
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:5173 (start the backend first: /api goes to Django)
 ```
 
 **Backend**
@@ -84,13 +91,13 @@ py -3.13 -m venv .venv                 # first time only
 .venv\Scripts\activate
 pip install -r requirements.txt        # first time only
 python manage.py migrate               # create / update the database
-python manage.py createsuperuser       # first time: your admin account
+python manage.py seed_demo_users       # first time: demo accounts from frontend/README.md
+python manage.py createsuperuser       # optional: your own admin account
 python manage.py runserver             # http://127.0.0.1:8000  (admin panel: /admin/)
 python manage.py test                  # run the tests
 ```
 
 ## Next steps
 
-- Connect the frontend's sign-in / sign-up pages to the auth API (Vite proxy `/api` → Django).
 - Move the other features from the mock API to Django, one by one.
-- Switch to PostgreSQL and add the backend to `docker-compose.yml`.
+- Switch to PostgreSQL and add the backend to `docker-compose.yml` (until then, the Docker production build at :8088 can't sign in: it has no backend behind `/api`).

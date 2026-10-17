@@ -1,4 +1,5 @@
 import { formatDate } from '../lib/format'
+import { verifyPassword } from './auth'
 import { db, nextId, save } from './db'
 import { ApiError } from './errors'
 import { findCert, findEnrolment } from './queries'
@@ -103,13 +104,14 @@ function buildMailto(email: string, studentName: string, certName: string): Vouc
 /** approve needs the logged-in admin's own password (replaces v1's hard-coded "admin"). */
 export async function setStatus(id: number, action: VoucherAction, adminPassword = ''): Promise<{ mailto: VoucherMailto | null }> {
   await delay()
-  const admin = requireRole('admin')
+  requireRole('admin')
+  if (!db().tables.voucherRequests.some(x => x.id === id)) throw new ApiError(404, 'Voucher request not found.')
+  if (action === 'approve' && !(adminPassword !== '' && await verifyPassword(adminPassword))) {
+    throw new ApiError(400, 'Incorrect admin password — the voucher was not approved.')
+  }
   const t = db().tables
   const v = t.voucherRequests.find(x => x.id === id)
   if (!v) throw new ApiError(404, 'Voucher request not found.')
-  if (action === 'approve' && adminPassword !== admin.password) {
-    throw new ApiError(400, 'Incorrect admin password — the voucher was not approved.')
-  }
   v.status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'pending'
   save()
   if (action !== 'approve') return { mailto: null }

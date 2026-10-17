@@ -81,6 +81,15 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class VerifyPasswordView(APIView):
+    """Re-checks the signed-in user's password before sensitive actions (enrolment, voucher approval)."""
+
+    def post(self, request):
+        if not request.user.check_password(request.data.get('password') or ''):
+            return Response({'detail': 'Wrong password.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class MeView(APIView):
     """The signed-in user, or 403 when nobody is signed in."""
 
