@@ -17,7 +17,7 @@ v1 (`../Project`) was a PHP/MySQL demo. v2 rebuilds it with a modern stack: a Re
 | Part | Technology | Why |
 |---|---|---|
 | Frontend | React 19 + Vite + TypeScript, React Router | Fast dev server, typed code, one page per v1 screen |
-| Backend | Django 6 (+ Django REST Framework later) | Built-in auth, admin panel and ORM |
+| Backend | Django 6 + Django REST Framework | Built-in auth, admin panel and ORM; DRF for the JSON API |
 | Database | SQLite for now → PostgreSQL later | SQLite needs no setup while we start |
 | Runtime | Docker + docker compose, Nginx | Same setup on every machine |
 
@@ -29,6 +29,7 @@ Project_v2/
 │   └── src/api/         mock API (data saved in the browser) — will call Django later
 ├── backend/             Django project
 │   ├── config/          settings, URLs, WSGI/ASGI
+│   ├── accounts/        users, sign up, sign in, sign out (API under /api/auth/)
 │   ├── manage.py
 │   └── requirements.txt
 ├── docs/                this file + design specs and plans
@@ -45,6 +46,25 @@ Project_v2/
    New `/signup` page (first name, last name, email, password + confirmation) linked from the sign-in page. New accounts are students. For now it uses the mock API.
 4. **Django backend created** (2026-10-17)
    Empty Django project in `backend/` (project package `config`). Nothing is connected to the frontend yet.
+5. **Accounts app: sign up and sign in API** (2026-10-17)
+   - Custom user model: people sign in with their **email** (no username), plus first name and last name. Passwords are hashed by Django.
+   - Roles are Django groups `student` and `admin` (created by a migration). New sign-ups are students; superusers count as admins.
+   - Sign-in uses Django session cookies, with CSRF protection on every POST.
+   - Responses use the same user shape as the frontend: `id, email, firstname, lastname, role, createdAt`. Errors return `{"detail": "message"}`.
+   - 7 automated tests (`python manage.py test accounts`). The frontend still uses the mock API.
+
+## Auth API
+
+| Method | URL | What it does |
+|---|---|---|
+| GET | `/api/auth/csrf/` | Sets the `csrftoken` cookie. Call it once before any POST |
+| POST | `/api/auth/register/` | Body `firstname, lastname, email, password`. Creates a student and signs in (201). Email taken → 409 |
+| POST | `/api/auth/login/` | Body `email, password`. Signs in (200). Wrong details → 401 |
+| POST | `/api/auth/logout/` | Signs out (204) |
+| GET | `/api/auth/me/` | The signed-in user (200), or 403 when nobody is signed in |
+
+Every POST must send the header `X-CSRFToken: <value of the csrftoken cookie>`.
+Passwords follow Django's rules: at least 8 characters, not too common, not all numbers, not too close to the name or email.
 
 ## How to run
 
@@ -63,12 +83,14 @@ cd backend
 py -3.13 -m venv .venv                 # first time only
 .venv\Scripts\activate
 pip install -r requirements.txt        # first time only
-python manage.py runserver             # http://127.0.0.1:8000
+python manage.py migrate               # create / update the database
+python manage.py createsuperuser       # first time: your admin account
+python manage.py runserver             # http://127.0.0.1:8000  (admin panel: /admin/)
+python manage.py test                  # run the tests
 ```
 
 ## Next steps
 
-- Create the `accounts` app: real sign up, sign in and sign out with Django auth (session cookies, roles "student" and "admin").
-- Add Django REST Framework and connect the frontend's sign-in / sign-up pages to the API.
+- Connect the frontend's sign-in / sign-up pages to the auth API (Vite proxy `/api` → Django).
 - Move the other features from the mock API to Django, one by one.
 - Switch to PostgreSQL and add the backend to `docker-compose.yml`.
