@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'accounts',
+    'exams',
+    'vouchers',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -134,5 +136,15 @@ STATIC_URL = 'static/'
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        "OPTIONS": {
+            "host": "localhost",
+            "port": 1025,
+        },
     },
 }
+WHITE_TEST_QUESTION_COUNT = 20
+WHITE_TEST_DURATION_MIN = 10
+WHITE_TEST_PASS_MARK = 70
+
+
+DEFAULT_FROM_EMAIL = "no-reply@tek-up.local"
