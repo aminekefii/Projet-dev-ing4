@@ -8,6 +8,7 @@ const apiTarget = process.env.API_TARGET ?? 'http://127.0.0.1:8000'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  css: { postcss: {} },
   server: {
     proxy: {
       '/api': { target: apiTarget },

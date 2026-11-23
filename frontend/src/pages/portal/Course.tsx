@@ -66,7 +66,7 @@ function CoursePlayer({ initial }: { initial: CourseView }) {
     const videoId = playing.id
     markedFor.current = videoId
     setCourse(c => withWatched(c, videoId))
-    progress.markWatched(videoId)
+    progress.markWatched(videoId, el.currentTime, el.duration)
       .then(r => setCourse(c => ({
         ...c,
         progress: r.progress,

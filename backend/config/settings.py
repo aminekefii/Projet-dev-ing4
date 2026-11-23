@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'accounts',
+    'courses',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -136,3 +137,9 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Course videos (protected): backend/media/courses/<media_path>/<section folder>/<file>
+# Served by Django in dev; behind Nginx set COURSE_MEDIA_ACCEL = True (X-Accel-Redirect).
+COURSE_MEDIA_ROOT = BASE_DIR / 'media' / 'courses'
+COURSE_MEDIA_ACCEL = False
