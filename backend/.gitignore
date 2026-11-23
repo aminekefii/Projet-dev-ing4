@@ -8,3 +8,6 @@ db.sqlite3
 
 # Local settings / secrets
 .env
+
+# Course videos (large, kept out of Git)
+media/

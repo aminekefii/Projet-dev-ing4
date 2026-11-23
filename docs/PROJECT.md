@@ -59,6 +59,15 @@ Project_v2/
    - Enrolment and voucher approval ask for the user's password again: the new `POST /api/auth/verify-password/` checks it in Django.
    - `python manage.py seed_demo_users` creates the demo accounts (user1, user2, admin @tek-up.de) in Django.
 
+7. **Certifications and courses connected to Django** (courses app)
+   - New `courses` app: certifications, course sections, videos, enrolments and watched videos, all visible in the Django admin.
+   - `python manage.py seed_courses` creates the 40 certifications, the PCEP / PCAP courses and the demo enrolments (user1: 2 PCAP videos watched, user2: all of them).
+   - Catalog, enrolment, "My certifications", cancel and the course player now call the Django API.
+   - **Protected videos**: video and subtitle files go through Django, which checks the enrolment. Files live in `backend/media/courses/<media path>/<section folder>/` (kept out of Git). Behind Nginx, set `COURSE_MEDIA_ACCEL = True` so Nginx sends the file (X-Accel-Redirect, location `/protected-media/` marked `internal`).
+   - **Honest progress**: the player sends the playback position and Django checks the 90 % rule itself, using the duration stored in the database.
+   - The other pages (dashboard, vouchers, white test, profile) still read the mock data; enrolments are copied there from Django until they move too.
+   - Automated tests: `python manage.py test courses` (12 tests).
+
 ## Auth API
 
 | Method | URL | What it does |
@@ -72,6 +81,20 @@ Project_v2/
 
 Every POST must send the header `X-CSRFToken: <value of the csrftoken cookie>`.
 Passwords follow Django's rules: at least 8 characters, not too common, not all numbers, not too close to the name or email.
+
+
+## Courses API (students only)
+
+| Method | URL | What it does |
+|---|---|---|
+| GET | `/api/certifications/catalog/` | Certifications grouped by category, with `enrolled` and `featured` |
+| POST | `/api/certifications/<id>/enroll/` | Body `password`. Enrols (201), already enrolled → `info` (200), closed / wrong password → 400 |
+| GET | `/api/certifications/mine/?filter=all\|earned\|in_progress` | The student's enrolments and counters |
+| POST | `/api/certifications/<id>/cancel/` | Cancels an in-progress enrolment (200), else 400 |
+| GET | `/api/courses/<id>/` | Sections, videos, progress. Unknown → 404, not enrolled → 403 |
+| POST | `/api/courses/videos/<id>/watched/` | Body `position, duration` (seconds). Counts the video once past 90 %, returns the new progress |
+| GET | `/api/courses/videos/<id>/stream/` | The video file, enrolled students only |
+| GET | `/api/courses/videos/<id>/subtitles/` | The .vtt subtitles, enrolled students only |
 
 ## How to run
 
@@ -92,6 +115,7 @@ py -3.13 -m venv .venv                 # first time only
 pip install -r requirements.txt        # first time only
 python manage.py migrate               # create / update the database
 python manage.py seed_demo_users       # first time: demo accounts from frontend/README.md
+python manage.py seed_courses          # then: certifications, courses, demo enrolments
 python manage.py createsuperuser       # optional: your own admin account
 python manage.py runserver             # http://127.0.0.1:8000  (admin panel: /admin/)
 python manage.py test                  # run the tests
